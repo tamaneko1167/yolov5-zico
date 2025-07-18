@@ -7,7 +7,7 @@ os.makedirs(PLOT_DIR, exist_ok=True)
 
 def plot_param_vs_score(params, scores, param_name, filename):
     plt.figure()
-    plt.plot(params, scores, marker="o")
+    plt.scatter(params, scores, marker="o")
     plt.xlabel(param_name)
     plt.ylabel("ZiCo Score")
     plt.title(f"{param_name} vs ZiCo Score")

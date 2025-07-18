@@ -8,7 +8,7 @@ import torch
 import yaml
 import optuna
 from models.yolo import Model
-from score import compute_zico_score
+from score import compute_zico_score_avg
 import matplotlib
 matplotlib.use('Agg') 
 import plot_utils
@@ -47,7 +47,7 @@ def objective(trial):
 
     try:
         # Compute ZiCo score
-        score = compute_zico_score(model, dummy_input)
+        score = compute_zico_score_avg(model, dummy_input, runs=3, seed=42)
         return score
     except Exception as e:
         print(f"[Trial Error] {e}")
