@@ -55,20 +55,12 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=20)
+    study.optimize(objective, n_trials=2000)
 
     depths = [t.params["depth_multiple"] for t in study.trials]
     scores = [t.value for t in study.trials]
 
     plot_utils.plot_param_vs_score(depths, scores, param_name="depth_multiple", filename="depth_vs_zico.png")
-
-    # # パラメータ重要度グラフ
-    # fig1 = vis.plot_param_importances(study)
-    # fig1.get_figure().savefig("zico_search/param_importance.png")
-
-    # # 最適化履歴グラフ
-    # fig2 = vis.plot_optimization_history(study)
-    # fig2.get_figure().savefig("zico_search/optimization_history.png")
 
     plt.close('all') 
 

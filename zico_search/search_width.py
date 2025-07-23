@@ -7,7 +7,7 @@ import torch
 import yaml
 import optuna
 from models.yolo import Model
-from score import compute_zico_score
+from score import compute_zico_score_avg
 import matplotlib
 matplotlib.use('Agg')
 import plot_utils
@@ -36,7 +36,7 @@ def objective(trial):
     dummy_input = torch.randn(1, 3, 640, 640).to(device)
 
     try:
-        score = compute_zico_score(model, dummy_input)
+        score = compute_zico_score_avg(model, dummy_input)
         return score
     except Exception as e:
         print(f"[Trial Error] {e}")
@@ -50,6 +50,7 @@ if __name__ == "__main__":
     scores = [t.value for t in study.trials]
 
     plot_utils.plot_param_vs_score(widths, scores, param_name="width_multiple", filename="width_vs_zico.png")
+    plot_utils.plot_param_vs_score(widths, scores, param_name="width_multiple", filename="width_vs_zico_spline.png")
 
     plt.close('all')
 
