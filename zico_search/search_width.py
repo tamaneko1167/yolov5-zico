@@ -13,7 +13,9 @@ matplotlib.use('Agg')
 import plot_utils
 import matplotlib.pyplot as plt
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')  # Force CPU execution to avoid interfering with GPU training
+
 
 def apply_width_multiple(model_cfg, width_multiple):
     for layer in model_cfg['backbone']:
