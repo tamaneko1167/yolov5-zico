@@ -46,7 +46,7 @@ def compute_model_metrics(model):
     return zico, params, flops
 
 def objective(trial):
-    depth = trial.suggest_float("depth_multiple", 0.33, 1.0)
+    depth = 0.98
     width = trial.suggest_float("width_multiple", 0.25, 1.0)
 
     with open("models/yolov5n.yaml") as f:
@@ -114,18 +114,18 @@ def plot_width_flops_params(results_with_hyperparams, save_path):
 
 if __name__ == "__main__":
     study = optuna.create_study(directions=["maximize", "minimize", "minimize"])
-    study.optimize(objective, n_trials=2000)  # 試行回数をここで調整
+    study.optimize(objective, n_trials=20)  # 試行回数をここで調整
 
-    # ZiCo vs FLOPs
-    optuna.visualization.plot_pareto_front(study, target_names=["Params", "FLOPs", "ZiCo"]).write_image(os.path.join(PLOT_DIR, "pareto_zico_flops_params.png"))
-    # multi-objective の場合は target を明示
-    imp_zico   = get_param_importances(study, target=lambda t: t.values[2])   # 例: values=[params, flops, zico]
-    imp_params = get_param_importances(study, target=lambda t: t.values[0])
-    imp_flops  = get_param_importances(study, target=lambda t: t.values[1])
+    # # ZiCo vs FLOPs
+    # optuna.visualization.plot_pareto_front(study, target_names=["Params", "FLOPs", "ZiCo"]).write_image(os.path.join(PLOT_DIR, "pareto_zico_flops_params.png"))
+    # # multi-objective の場合は target を明示
+    # imp_zico   = get_param_importances(study, target=lambda t: t.values[2])   # 例: values=[params, flops, zico]
+    # imp_params = get_param_importances(study, target=lambda t: t.values[0])
+    # imp_flops  = get_param_importances(study, target=lambda t: t.values[1])
 
-    print("ZiCo importance:", imp_zico)
-    print("Params importance:", imp_params)
-    print("FLOPs importance:", imp_flops)
+    # print("ZiCo importance:", imp_zico)
+    # print("Params importance:", imp_params)
+    # print("FLOPs importance:", imp_flops)
 
     plot_depth_flops_params(results,save_path=os.path.join(PLOT_DIR, "depth_flops_params.png"))
     plot_width_flops_params(results,save_path=os.path.join(PLOT_DIR, "width_flops_params.png"))
