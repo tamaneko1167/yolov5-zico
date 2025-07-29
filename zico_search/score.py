@@ -7,7 +7,7 @@ from thop import profile
 
 import random
 
-def compute_zico_score_avg(model, input_tensor, runs=3, seed=42):
+def compute_zico_score_avg(model, input_tensor, runs=5, seed=42):
     scores = []
     for i in range(runs):
         # 乱数を毎回固定（PyTorch, NumPy, Python組み込み）

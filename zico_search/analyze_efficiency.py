@@ -34,20 +34,13 @@ def compute_model_metrics(model):
     dummy_input = torch.randn(1, 3, 640, 640).to(device)
 
     zico = compute_zico_score_avg(model, dummy_input, runs=3, seed=42)
-    # params = sum(p.numel() for p in model.parameters())
-
-    # with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU],
-    #                             record_shapes=True) as prof:
-    #     with torch.profiler.record_function("model_inference"):
-    #         model(dummy_input)
-    # flops = sum([e.cpu_time_total for e in prof.key_averages() if e.cpu_time_total is not None])
     flops, params = profile(model, inputs=(dummy_input,), verbose=False)
 
     return zico, params, flops
 
 def objective(trial):
-    depth = 0.98
-    width = trial.suggest_float("width_multiple", 0.25, 1.0)
+    depth = trial.suggest_float("depth_multiple", 0.33, 1.0)
+    width = 0.5  # Fixed width because we figured out that width has no impact on the score
 
     with open("models/yolov5n.yaml") as f:
         cfg = yaml.safe_load(f)
@@ -63,58 +56,9 @@ def objective(trial):
         print(f"[Trial Error] {e}")
         raise optuna.exceptions.TrialPruned()
 
-from mpl_toolkits.mplot3d import Axes3D
-import numpy as np
-
-def plot_depth_flops_params(results_with_hyperparams, save_path):
-    depth_list = [r[3] for r in results_with_hyperparams]
-    flops_list = [r[2] for r in results_with_hyperparams]
-    params_list = [r[1] for r in results_with_hyperparams]
-    zico_scores = [r[0] for r in results_with_hyperparams]
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-
-    scatter = ax.scatter(flops_list, params_list, zico_scores, c=depth_list, cmap='plasma', s=40)
-    fig.colorbar(scatter, label="ZiCo Score")
-
-    ax.set_xlabel("FLOPs")
-    ax.set_ylabel("Params")
-    ax.set_zlabel("ZiCo Score")
-    plt.title("FLOPs × Params (Depth Score color)")
-
-    plt.tight_layout()
-    plt.savefig(save_path)
-    plt.close()
-
-def plot_width_flops_params(results_with_hyperparams, save_path):
-
-    width_list = [r[4] for r in results_with_hyperparams]
-    flops_list = [r[2] for r in results_with_hyperparams]
-    params_list = [r[1] for r in results_with_hyperparams]
-    zico_scores = [r[0] for r in results_with_hyperparams]
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-
-    scatter = ax.scatter(flops_list, params_list, zico_scores, c=width_list, cmap='plasma', s=40)
-    fig.colorbar(scatter, label="ZiCo Score")
-
-    ax.set_xlabel("FLOPs")
-    ax.set_ylabel("Params")
-    ax.set_zlabel("ZiCo Score")
-    plt.title("FLOPs × Params (Width Score color)")
-
-    plt.tight_layout()
-    plt.savefig(save_path)
-    plt.close()
-
-
-
-
 if __name__ == "__main__":
     study = optuna.create_study(directions=["maximize", "minimize", "minimize"])
-    study.optimize(objective, n_trials=20)  # 試行回数をここで調整
+    study.optimize(objective, n_trials=2000)  # 試行回数をここで調整
 
     # # ZiCo vs FLOPs
     # optuna.visualization.plot_pareto_front(study, target_names=["Params", "FLOPs", "ZiCo"]).write_image(os.path.join(PLOT_DIR, "pareto_zico_flops_params.png"))
@@ -127,20 +71,14 @@ if __name__ == "__main__":
     # print("Params importance:", imp_params)
     # print("FLOPs importance:", imp_flops)
 
-    plot_depth_flops_params(results,save_path=os.path.join(PLOT_DIR, "depth_flops_params.png"))
-    plot_width_flops_params(results,save_path=os.path.join(PLOT_DIR, "width_flops_params.png"))
-    # Width vs 各指標の可視化
-    plot_utils.plot_width_vs_metric(
-        results, metric_index=0, ylabel="ZiCo Score",
-        save_path=os.path.join(PLOT_DIR, "width_vs_zico.png")
-    )
+    plot_utils.plot_depth_flops_params(results,save_path=os.path.join(PLOT_DIR, "flops_params_zico_colored_by_depth.png"))
 
-    plot_utils.plot_width_vs_metric(
-        results, metric_index=1, ylabel="Params",
-        save_path=os.path.join(PLOT_DIR, "width_vs_params.png")
-    )
+    # Depth Multiple vs each metric
+    plot_utils.plot_param_vs_metric(results, 3, 0, "Depth Multiple", "ZiCo Score", os.path.join(PLOT_DIR, "depth_vs_zico.png"))
 
-    plot_utils.plot_width_vs_metric(
-        results, metric_index=2, ylabel="FLOPs",
-        save_path=os.path.join(PLOT_DIR, "width_vs_flops.png")
-    )
+    # Depth Multiple vs Params
+    plot_utils.plot_param_vs_metric(results, 3, 1, "Depth Multiple", "Params", os.path.join(PLOT_DIR, "depth_vs_params.png"))
+
+    # Depth Multiple vs FLOPs
+    plot_utils.plot_param_vs_metric(results, 3, 2, "Depth Multiple", "FLOPs", os.path.join(PLOT_DIR, "depth_vs_flops.png"))
+
