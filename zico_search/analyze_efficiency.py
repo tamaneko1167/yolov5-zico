@@ -6,6 +6,7 @@ import sys
 import torch
 from thop import profile
 import yaml
+import numpy as np
 import optuna
 from optuna.importance import get_param_importances
 import matplotlib.pyplot as plt
@@ -39,7 +40,9 @@ def compute_model_metrics(model):
     return zico, params, flops
 
 def objective(trial):
-    depth = trial.suggest_float("depth_multiple", 0.33, 1.0)
+    # depth = trial.suggest_float("depth_multiple", 0.33, 1.0) # Depth is discreted because it's rounded to nearest integer
+    depth_list = np.round(np.arange(0.3, 1.05, 0.05), 2).tolist()
+    depth = trial.suggest_categorical("depth_multiple", depth_list)
     width = 0.5  # Fixed width because we figured out that width has no impact on the score
 
     with open("models/yolov5n.yaml") as f:
