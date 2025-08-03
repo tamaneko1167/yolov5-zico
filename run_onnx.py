@@ -1,7 +1,7 @@
 import os
 import time
 import onnxruntime as ort
-from onnxruntime_extensions import ops
+#from onnxruntime_extensions import ops
 import numpy as np
 import cv2
 from pathlib import Path
