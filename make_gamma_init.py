@@ -1,11 +1,11 @@
 # make_gamma_init.py
 """
-例:
-python make_gamma_init_only.py \
-  --cfg models/yolov5n_d085_w025_sppNone.yaml \
+ex:
+python3 make_gamma_init.py \
+  --cfg models/yolov5n_d033_w025_spp.yaml \
   --weights yolov5n.pt \
   --gamma 1.5 \
-  --out init_d085_w025_sppNone_g150.pt
+  --out init_d033_w025_spp_g150.pt
 """
 import argparse, os, sys, yaml, torch, pathlib, urllib.request, tempfile, shutil
 import torch.nn as nn
