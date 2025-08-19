@@ -2,10 +2,10 @@
 """
 ex:
 python3 make_gamma_init.py \
-  --cfg models/yolov5n_d033_w025_spp.yaml \
+  --cfg models/yolov5n.yaml \
   --weights yolov5n.pt \
   --gamma 1.5 \
-  --out init_d033_w025_spp_g150.pt
+  --out init_d033_w025_sppf_g150.pt
 """
 import argparse, os, sys, yaml, torch, pathlib, urllib.request, tempfile, shutil
 import torch.nn as nn
